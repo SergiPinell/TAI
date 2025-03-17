@@ -20,3 +20,57 @@ ip route replace default scope global \
 # Mostrar la taula d'encaminament per verificar
 echo "Entrada multipath per defecte afegida. Taula d'encaminament actual:"
 ip route
+
+
+
+
+
+
+
+canviaBalanceig.sh
+
+
+#!/bin/bash
+
+# Verificar que s'han passat els dos paràmetres necessaris
+if [ "$#" -ne 2 ]; then
+    echo "Ús: $0 <percentatge_eth0> <percentatge_eth1>"
+    exit 1
+fi
+
+# Percentatges de càrrega per a eth0 i eth1
+PERCENT_ETH0=$1
+PERCENT_ETH1=$2
+
+# Verificar que la suma dels percentatges és 100
+if [ $((PERCENT_ETH0 + PERCENT_ETH1)) -ne 100 ]; then
+    echo "Error: La suma dels percentatges ha de ser 100."
+    exit 1
+fi
+
+# Adreces IP dels gateways
+GATEWAY_ETH0="192.168.0.1"  # Canvia si és necessari
+GATEWAY_ETH1="192.168.1.1"  # Canvia si és necessari
+
+# Interfícies locals de sortida
+INTERFACE_ETH0="eth0"
+INTERFACE_ETH1="eth1"
+
+# Convertir percentatges a pesos
+# Els pesos han de ser enters, per això multipliquem per un factor comú (per exemple, 10)
+WEIGHT_ETH0=$((PERCENT_ETH0 * 10))
+WEIGHT_ETH1=$((PERCENT_ETH1 * 10))
+
+# Modificar la configuració de balanceig
+ip route replace default scope global \
+    nexthop via $GATEWAY_ETH0 dev $INTERFACE_ETH0 weight $WEIGHT_ETH0 \
+    nexthop via $GATEWAY_ETH1 dev $INTERFACE_ETH1 weight $WEIGHT_ETH1
+
+# Mostrar la taula d'encaminament per verificar
+echo "Configuració de balanceig actualitzada:"
+echo "  - eth0: $PERCENT_ETH0% (pes: $WEIGHT_ETH0)"
+echo "  - eth1: $PERCENT_ETH1% (pes: $WEIGHT_ETH1)"
+ip route
+
+
+
