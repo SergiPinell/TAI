@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Adreces IP dels gateways
+GATEWAY1="192.168.0.1"
+GATEWAY2="192.168.1.1"
+
+# Interfícies locals de sortida
+INTERFACE1="eth0"
+INTERFACE2="eth1"
+
+# Pesos per al balanceig (opcional)
+WEIGHT1=1
+WEIGHT2=1
+
+# Afegir entrada multipath per defecte
+ip route replace default scope global \
+    nexthop via $GATEWAY1 dev $INTERFACE1 weight $WEIGHT1 \
+    nexthop via $GATEWAY2 dev $INTERFACE2 weight $WEIGHT2
+
+# Mostrar la taula d'encaminament per verificar
+echo "Entrada multipath per defecte afegida. Taula d'encaminament actual:"
+ip route
